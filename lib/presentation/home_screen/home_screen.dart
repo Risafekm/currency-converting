@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               _convertedValue.isEmpty
-                                  ? 'Converted Value'
+                                  ? 'Result'
                                   : _convertedValue,
                               style: const TextStyle(
                                 fontSize: 16,
