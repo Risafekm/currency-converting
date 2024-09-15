@@ -1,8 +1,9 @@
-// ignore_for_file: unused_local_variable, unused_field
-
-import 'package:currency_main/core/const.dart';
-import 'package:currency_main/presentation/home_screen/widgets/main_container.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:currency_main/application/provider/userprovider_currency.dart';
+import 'package:currency_main/core/const.dart';
+import 'package:currency_main/core/models/currency_model.dart';
+import 'package:currency_main/presentation/home_screen/widgets/main_container.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,19 +18,51 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _outputCurrency = 'USD'; // Output currency
   String _convertedValue = ''; // Holds the converted value
 
-  // Conversion rates between INR, USD, and EURO
-  final Map<String, double> _conversionRates = {
-    'INR': 1.0,
-    'USD': 0.012,
-    'EURO': 0.011,
-  };
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Provider.of<UserProviderCurrency>(context, listen: false).getData();
+    });
+    super.initState();
+  }
 
-  // Function to handle currency conversion
-  void _convertCurrency() {
+  // Function to handle currency conversion using API data
+  void _convertCurrency(UserProviderCurrency provider) {
     double amount = double.tryParse(_amountController.text) ?? 0;
-    double conversionRate = _conversionRates[_outputCurrency]! /
-        _conversionRates[_selectedCurrency]!;
-    double convertedAmount = amount * conversionRate;
+
+    // Fetch conversion rates from the provider
+    double inputRate = provider.posts
+            .firstWhere(
+                (currency) => currency.currencyName == _selectedCurrency,
+                orElse: () => CurrencyModel(
+                    currencyNo: '',
+                    currencyName: _selectedCurrency!,
+                    currencyRates: '1',
+                    permission: ''))
+            .currencyRates
+            .isNotEmpty
+        ? double.parse(provider.posts
+            .firstWhere(
+                (currency) => currency.currencyName == _selectedCurrency)
+            .currencyRates)
+        : 1.0;
+
+    double outputRate = provider.posts
+            .firstWhere((currency) => currency.currencyName == _outputCurrency,
+                orElse: () => CurrencyModel(
+                    currencyNo: '',
+                    currencyName: _outputCurrency!,
+                    currencyRates: '1',
+                    permission: ''))
+            .currencyRates
+            .isNotEmpty
+        ? double.parse(provider.posts
+            .firstWhere((currency) => currency.currencyName == _outputCurrency)
+            .currencyRates)
+        : 1.0;
+
+    // Perform the conversion
+    double convertedAmount = amount * (outputRate / inputRate);
 
     setState(() {
       _convertedValue =
@@ -39,7 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<UserProviderCurrency>(context);
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -100,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           // TextField for entering the amount
                           Container(
                             margin: const EdgeInsets.only(left: 4),
-                            width: size.width * .7,
+                            width: size.width * .55,
                             child: TextField(
                               controller: _amountController,
                               keyboardType: TextInputType.number,
@@ -108,7 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 border: InputBorder.none,
                               ),
                               onChanged: (value) {
-                                _convertCurrency(); // Recalculate on amount change
+                                _convertCurrency(
+                                    provider); // Recalculate on amount change
                               },
                             ),
                           ),
@@ -123,33 +159,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                 iconEnabledColor: Colors.white,
                                 style: const TextStyle(color: Colors.white),
                                 dropdownColor: backgroundColor,
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: "INR",
+                                items: provider.posts.map((currency) {
+                                  return DropdownMenuItem(
+                                    value: currency.currencyName,
                                     child: Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Text('INR'),
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: Text(currency.currencyName),
                                     ),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "USD",
-                                    child: Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Text('USD'),
-                                    ),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "EURO",
-                                    child: Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Text('EURO'),
-                                    ),
-                                  ),
-                                ],
+                                  );
+                                }).toList(),
                                 onChanged: (value) {
                                   setState(() {
                                     _selectedCurrency = value;
-                                    _convertCurrency(); // Recalculate on currency change
+                                    _convertCurrency(
+                                        provider); // Recalculate on currency change
                                   });
                                 },
                               ),
@@ -187,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Displaying the converted value
                           Container(
                             margin: const EdgeInsets.only(left: 4),
-                            width: size.width * .7,
+                            width: size.width * .55,
                             alignment: Alignment.centerLeft,
                             child: Text(
                               _convertedValue.isEmpty
@@ -210,33 +233,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                 underline: const SizedBox.shrink(),
                                 style: const TextStyle(color: Colors.white),
                                 dropdownColor: backgroundColor,
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: "INR",
+                                items: provider.posts.map((currency) {
+                                  return DropdownMenuItem(
+                                    value: currency.currencyName,
                                     child: Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Text('INR'),
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: Text(currency.currencyName),
                                     ),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "USD",
-                                    child: Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Text('USD'),
-                                    ),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: "EURO",
-                                    child: Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: Text('EURO'),
-                                    ),
-                                  ),
-                                ],
+                                  );
+                                }).toList(),
                                 onChanged: (value) {
                                   setState(() {
                                     _outputCurrency = value;
-                                    _convertCurrency(); // Recalculate on currency change
+                                    _convertCurrency(
+                                        provider); // Recalculate on currency change
                                   });
                                 },
                               ),
@@ -251,12 +261,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // heading text
+          // Heading text
           const Positioned(
             top: 290,
             left: 140,
             child: Text(
-              'Currency Convertor',
+              'Currency Converter',
               style: TextStyle(
                 fontSize: 22,
                 color: Colors.white,
