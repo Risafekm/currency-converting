@@ -166,10 +166,10 @@ class _DataSubmitState extends State<DataSubmit> {
           ),
 
           // Heading text
-          const Positioned(
-            top: 260,
-            left: 170,
-            child: Text(
+          Positioned(
+            top: size.height * .46,
+            left: size.width * .29,
+            child: const Text(
               'Data Submitter',
               style: TextStyle(
                 fontSize: 22,
