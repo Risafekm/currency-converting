@@ -1,3 +1,5 @@
+import 'package:currency_main/presentation/data_submit_page/data_submit.dart';
+import 'package:currency_main/presentation/home_screen/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:currency_main/application/provider/userprovider_currency.dart';
@@ -91,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             bottom: 0,
             child: Container(
-              height: size.height * .36,
+              height: size.height * .3,
               width: size.width,
               color: Colors.white,
             ),
@@ -133,28 +135,33 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         children: [
                           // TextField for entering the amount
-                          Container(
-                            margin: const EdgeInsets.only(left: 4),
-                            width: size.width * .55,
-                            child: TextField(
-                              controller: _amountController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
+                          Expanded(
+                            flex: 5,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 4),
+                              width: size.width * .58,
+                              child: TextField(
+                                controller: _amountController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                onChanged: (value) {
+                                  _convertCurrency(
+                                      provider); // Recalculate on amount change
+                                },
                               ),
-                              onChanged: (value) {
-                                _convertCurrency(
-                                    provider); // Recalculate on amount change
-                              },
                             ),
                           ),
 
                           // Dropdown for selecting input currency
                           Expanded(
+                            flex: 2,
                             child: Container(
                               color: backgroundColor,
                               child: DropdownButton<String>(
                                 value: _selectedCurrency,
+                                isExpanded: true, // Avoid overflow
                                 underline: const SizedBox.shrink(),
                                 iconEnabledColor: Colors.white,
                                 style: const TextStyle(color: Colors.white),
@@ -208,29 +215,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         children: [
                           // Displaying the converted value
-                          Container(
-                            margin: const EdgeInsets.only(left: 4),
-                            width: size.width * .55,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              _convertedValue.isEmpty
-                                  ? 'Result'
-                                  : _convertedValue,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
+                          Expanded(
+                            flex: 5,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 4),
+                              width: size.width * .58,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _convertedValue.isEmpty
+                                    ? 'Result'
+                                    : _convertedValue,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                           ),
 
                           // Dropdown for selecting output currency
                           Expanded(
+                            flex: 2,
                             child: Container(
                               color: backgroundColor,
                               child: DropdownButton<String>(
                                 value: _outputCurrency,
                                 iconEnabledColor: Colors.white,
                                 underline: const SizedBox.shrink(),
+                                isExpanded: true, // Avoid overflow
                                 style: const TextStyle(color: Colors.white),
                                 dropdownColor: backgroundColor,
                                 items: provider.posts.map((currency) {
@@ -255,6 +267,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 28),
+
+                    //button
+                    CustomButton(
+                      size: size,
+                      text: 'Next',
+                      isIcon: true,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DataSubmit()));
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -262,10 +288,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // Heading text
-          const Positioned(
-            top: 290,
-            left: 140,
-            child: Text(
+          Positioned(
+            top: size.height * .45,
+            left: size.width * .27,
+            child: const Text(
               'Currency Converter',
               style: TextStyle(
                 fontSize: 22,

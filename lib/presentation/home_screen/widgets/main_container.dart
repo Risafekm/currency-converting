@@ -13,7 +13,7 @@ class MainContainer extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return Container(
-      height: size.height * .43,
+      height: size.height * .4,
       width: size.width * .8,
       decoration: const BoxDecoration(
         color: Colors.white,

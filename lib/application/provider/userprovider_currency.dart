@@ -13,7 +13,8 @@ class UserProviderCurrency extends ChangeNotifier {
   Future<void> getData() async {
     isLoading = true;
     notifyListeners();
-    var api = "https://api.muhammedhafiz.com/risaf/currency/read_currency.php";
+    var api =
+        "https://api.muhammedhafiz.com/new_project/currency/read_currency.php";
     try {
       var response = await http.get(Uri.parse(api));
       if (response.statusCode == 200) {
